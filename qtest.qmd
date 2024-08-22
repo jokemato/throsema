@@ -1,0 +1,229 @@
+---
+title: "Semesterarbeit"
+author: "Emma Charlotte Reinecke"
+bibliography: references.bib
+csl: chicago-fullnote-bibliography-short-title-subsequent.csl
+toc: true
+number-sections: true
+format:
+  pdf:
+    documentclass: scrartcl
+    number-sections: true
+    template-partials:
+      - "before-body.tex"
+      - "_titlepage.tex" 
+    include-in-header: 
+      - "in-header.tex"
+    lang: de-DE
+    code-line-numbers: true
+    geometry: 
+      - top=30mm
+      - bottom=30mm
+      - left=30mm
+      - right=25mm
+    fontsize: 11pt
+    linestretch: 1.5
+    papersize: a4 
+editor: visual
+---
+
+## Quarto
+
+```{r}
+#| label: load-pkgs
+#| code-summary: "Packages"
+#| message: false
+
+library(openintro)  # for data
+library(tidyverse)  # for data wrangling and visualization
+library(knitr)      # for tables
+library(broom)      # for model summary
+library(DiagrammeR)
+```
+
+```{r}
+#| label: find-avg-mpg
+#| echo: false
+# calculate a value and use it inside text
+avg_mpg <- mean(mtcars$mpg)
+```
+
+The average fuel efficiency for cars from 1974 was `r round(avg_mpg, 1)` miles per gallon.
+
+```{r}
+#requires: library(DiagrammeR)
+create_graph() %>%
+  add_node() %>%
+  add_node() %>%
+  add_edge(from = 1, to = 2) %>%
+  render_graph()
+```
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>. Grundlage für dieses qmd [Quarto Authoring](https://quarto.org/docs/get-started/authoring/rstudio.html "Quarto Authoring"): https://quarto.org/docs/get-started/authoring/rstudio.html Ein einfaches Diagramm aus diesem [Tutorial](https://www.datanovia.com/guide/tools/quarto/cross-references.html):
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+## Introduction
+
+Let's start by loading the packages we'll use for the analysis. See this analysis using literate programming [Vgl. @knuth1984, S. 77.].
+
+Grundlage für dieses qmd
+
+$$
+price = \hat{\beta}_0 + \hat{\beta}_1 \times area + \epsilon
+$$ {#eq-slrtest}
+
+Let's start by loading the packages we'll use for the analysis. See this analysis using literate programming [Vgl. @knuth1984, S. 77.].
+
+We present the results of exploratory data analysis in @sec-eda and the regression model in @sec-model.
+
+<!--# ADD CITATION HERE -->
+
+## Exploratory data analysis {#sec-eda}
+
+The data contains `{r} nrow(duke_forest)` houses. As part of the exploratory analysis let's visualize and summarize the relationship between areas and prices of these houses.
+
+::: {#fig-box}
+```{r}
+#| echo: false
+
+
+x <- c(1, 2, 3, 4, 5, 10)
+boxplot(x)
+
+```
+
+This dataset has `{r} length(x)` observations.
+:::
+
+### Data visualization
+
+@fig-histogram shows two histograms displaying the distributions of `price` and `area` individually.
+
+```{r}
+#| label: fig-histogram
+#| fig-cap: "Histograms of individual variables"
+#| fig-subcap:
+#|   - "Histogram of `price`s"
+#|   - "Histogram of `area`s" 
+#| layout-ncol: 2
+
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram(binwidth = 50000) +
+  labs(title = "Histogram of prices")
+
+ggplot(duke_forest, aes(x = area)) +
+  geom_histogram(binwidth = 250) +
+  labs(title = "Histogram of areas")
+```
+
+@fig-scatterplot displays the relationship between these two variables in a scatterplot.
+
+```{r}
+#| label: fig-scatterplot
+#| fig-cap: "Scatterplot of price vs. area of houses in Duke Forest"
+
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point() +
+  labs(title = "Price and area of houses in Duke Forest")
+```
+
+<!--#\footnotetext{Vgl. Reynolds und Curtin, \emph{New Business Creation}, S. 6.}  -->
+
+### Summary statistics
+
+@tbl-stats displays basic summary statistics for these two variables. @knuth1984 [S. 33] sagt blablah. Für weitere Zitierungen und Fußnoten: [qmd citation](https://www.datanovia.com/guide/tools/quarto/citations-and-footnotes.html). Ansonsten ist hier eine Fußnotenreference,[^1] and another.[^2]
+
+[^1]: Here is the footnote.
+
+[^2]: Here's one with multiple blocks.
+
+    Subsequent paragraphs are indented to show that they belong to the previous footnote.
+
+    ```         
+    { some.code }
+    ```
+
+    The whole paragraph can be indented, or just the first line. In this way, multi-paragraph footnotes work like multi-paragraph list items.
+
+This paragraph won't be part of the note, because it isn't indented. Here is an inline note.[^3]
+
+[^3]: Inlines notes are easier to write, since you don't have to pick an identifier and move down to type the note.
+
+```{r}
+#| label: tbl-stats
+#| tbl-cap: "Summary statistics for price and area of houses in Duke Forest"
+
+duke_forest %>%
+  summarise(
+    `Median price` = median(price),
+    `IQR price` = IQR(price),
+    `Median area` = median(area),
+    `IQR area` = IQR(area),
+    `Correlation, r` = cor(price, area)
+    ) %>%
+  kable(digits = c(0, 0, 0, 0, 2))
+```
+
+## Modeling {#sec-model}
+
+We can fit a simple linear regression model of the form shown in @eq-slr.
+
+$$
+price = \hat{\beta}_0 + \hat{\beta}_1 \times area + \epsilon
+$$ {#eq-slr}
+
+@tbl-lm shows the regression output for this model.
+
+```{r}
+#| label: tbl-lm
+#| tbl-cap: "Linear regression model for predicting price from area"
+
+price_fit <- lm(price ~ area, data = duke_forest)
+  
+price_fit %>%
+  tidy() %>%
+  kable(digits = c(0, 0, 2, 2, 2))
+```
+
+We present the results of exploratory data analysis in @sec-eda and the regression model in @sec-model.
+
+@fig-scatterplot displays the relationship between these two variables in a scatterplot.
+
+@tbl-stats displays basic summary statistics for these two variables.
+
+We can fit a simple linear regression model of the form shown in @eq-slr.
+
+Tabelle ohne R: *Felis catus* does not have nine lives. @tbl-cats shows the number of lives of three known cats.
+
+| Cat           | Number of lives |
+|---------------|-----------------|
+| Hello Kitty   | 1               |
+| Felix the cat | 1               |
+| Garfield      | 1               |
+
+: List of known cats and their number of lives {#tbl-cats}
+
+You can suppress generation of a bibliography by including suppress-bibliography: true option in your document yaml.
+
+Schluss und Ende.
+
+## Literaturverzeichnis {.unnumbered}
+
+::: {#refs}
+:::
